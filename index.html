@@ -1,382 +1,440 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purrfect tang- Dog Breed Blog</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0f;
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
+  }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(99, 55, 255, 0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 70%, rgba(255, 55, 150, 0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(55, 200, 255, 0.08) 0%, transparent 70%);
+    z-index: 0;
+    animation: bgPulse 8s ease-in-out infinite alternate;
+  }
 
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-            animation: fadeInDown 1s ease;
-        }
+  @keyframes bgPulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+  }
 
-        header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+  .calc-wrapper {
+    position: relative;
+    z-index: 1;
+    animation: floatIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
 
-        header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-        .search-bar {
-            max-width: 600px;
-            margin: 30px auto;
-            position: relative;
-            animation: fadeIn 1.5s ease;
-        }
+  .calculator {
+    width: 340px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 40px 80px rgba(0,0,0,0.6),
+      0 0 80px rgba(99,55,255,0.08);
+  }
 
-        .search-bar input {
-            width: 100%;
-            padding: 15px 50px 15px 20px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1em;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
+  /* Display */
+  .display {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 18px;
+    padding: 20px 20px 16px;
+    margin-bottom: 20px;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 6px;
+    overflow: hidden;
+  }
 
-        .search-bar input:focus {
-            outline: none;
-            transform: scale(1.02);
-        }
+  .expression {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.05em;
+    min-height: 18px;
+    word-break: break-all;
+    text-align: right;
+    transition: all 0.2s;
+  }
 
-        .search-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2em;
-            color: #667eea;
-        }
+  .result {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -1px;
+    line-height: 1;
+    transition: all 0.15s;
+    word-break: break-all;
+    text-align: right;
+    max-width: 100%;
+  }
 
-        .filters {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-            animation: fadeIn 2s ease;
-        }
+  .result.shrink { font-size: 28px; }
+  .result.error { color: #ff6b8a; font-size: 24px; }
 
-        .filter-btn {
-            padding: 10px 25px;
-            border: 2px solid white;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1em;
-            backdrop-filter: blur(10px);
-        }
+  /* Buttons */
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
 
-        .filter-btn:hover, .filter-btn.active {
-            background: white;
-            color: #667eea;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
+  .btn {
+    height: 68px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    transition: all 0.12s ease;
+    position: relative;
+    overflow: hidden;
+    outline: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
-        .blog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            animation: fadeInUp 1s ease;
-        }
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.1s;
+    border-radius: inherit;
+  }
 
-        .blog-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.4s ease;
-            cursor: pointer;
-        }
+  .btn:active::after {
+    background: rgba(255,255,255,0.12);
+  }
 
-        .blog-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
+  .btn:active {
+    transform: scale(0.94);
+  }
 
-        .blog-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
+  /* Ripple */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: rippleAnim 0.4s linear;
+    background: rgba(255,255,255,0.2);
+    pointer-events: none;
+  }
+  @keyframes rippleAnim {
+    to { transform: scale(4); opacity: 0; }
+  }
 
-        .blog-card:hover .blog-image {
-            transform: scale(1.1);
-        }
+  /* Number buttons */
+  .btn-num {
+    background: rgba(255, 255, 255, 0.07);
+    color: #e8e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .btn-num:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
 
-        .blog-content {
-            padding: 25px;
-        }
+  /* Operator buttons */
+  .btn-op {
+    background: rgba(99, 55, 255, 0.2);
+    color: #a78bfa;
+    border: 1px solid rgba(99, 55, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(99,55,255,0.1);
+  }
+  .btn-op:hover {
+    background: rgba(99, 55, 255, 0.35);
+    border-color: rgba(99, 55, 255, 0.5);
+    color: #c4b5fd;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(99,55,255,0.25);
+  }
 
-        .blog-category {
-            display: inline-block;
-            padding: 5px 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            font-size: 0.85em;
-            margin-bottom: 15px;
-        }
+  /* Equals button */
+  .btn-eq {
+    background: linear-gradient(135deg, #6337ff, #a855f7);
+    color: #ffffff;
+    border: 1px solid rgba(99,55,255,0.5);
+    font-size: 22px;
+    box-shadow: 0 4px 20px rgba(99,55,255,0.4);
+  }
+  .btn-eq:hover {
+    background: linear-gradient(135deg, #7c4fff, #c026d3);
+    box-shadow: 0 6px 24px rgba(99,55,255,0.55);
+    transform: translateY(-2px);
+  }
 
-        .blog-title {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            color: #333;
-        }
+  /* Clear / function buttons */
+  .btn-fn {
+    background: rgba(255, 70, 120, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(255, 70, 120, 0.25);
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(255,70,120,0.08);
+  }
+  .btn-fn:hover {
+    background: rgba(255, 70, 120, 0.28);
+    border-color: rgba(255,70,120,0.4);
+    color: #fca5a5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(255,70,120,0.2);
+  }
 
-        .blog-description {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
+  /* Zero spans 2 cols */
+  .btn-zero {
+    grid-column: span 2;
+    border-radius: 20px;
+    font-size: 20px;
+  }
 
-        .blog-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
+  /* Decimal */
+  .btn-dot {
+    background: rgba(255, 255, 255, 0.07);
+    color: #e8e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 24px;
+  }
+  .btn-dot:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
 
-        .read-more {
-            color: #667eea;
-            font-weight: bold;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
+  /* Label */
+  .label {
+    text-align: center;
+    margin-top: 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: rgba(255, 255, 255, 0.12);
+    text-transform: uppercase;
+  }
 
-        .read-more:hover {
-            color: #764ba2;
-            transform: translateX(5px);
-            display: inline-block;
-        }
-
-        .likes {
-            color: #999;
-            font-size: 0.9em;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2em;
-            }
-            
-            .blog-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  /* Glow corner accents */
+  .calculator::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px;
+    height: 60px;
+    border-radius: 28px 28px 0 0;
+    background: linear-gradient(to bottom, rgba(99,55,255,0.12), transparent);
+    pointer-events: none;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🐾 Purrfect Paws</h1>
-            <p>Discover the wonderful world of cat breeds</p>
-        </header>
 
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search for cat breeds...">
-            <span class="search-icon">🔍</span>
-        </div>
-
-        <div class="filters">
-            <button class="filter-btn active" data-filter="all">All Breeds</button>
-            <button class="filter-btn" data-filter="long-hair">Long Hair</button>
-            <button class="filter-btn" data-filter="short-hair">Short Hair</button>
-            <button class="filter-btn" data-filter="exotic">Exotic</button>
-        </div>
-
-        <div class="blog-grid" id="blogGrid"></div>
+<div class="calc-wrapper">
+  <div class="calculator">
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="result" id="result">0</div>
     </div>
+    <div class="buttons" id="buttons">
+      <!-- Row 1 -->
+      <button class="btn btn-fn" data-action="clear">AC</button>
+      <button class="btn btn-fn" data-action="sign">+/−</button>
+      <button class="btn btn-fn" data-action="percent">%</button>
+      <button class="btn btn-op" data-action="op" data-val="÷">÷</button>
+      <!-- Row 2 -->
+      <button class="btn btn-num" data-action="num" data-val="7">7</button>
+      <button class="btn btn-num" data-action="num" data-val="8">8</button>
+      <button class="btn btn-num" data-action="num" data-val="9">9</button>
+      <button class="btn btn-op" data-action="op" data-val="×">×</button>
+      <!-- Row 3 -->
+      <button class="btn btn-num" data-action="num" data-val="4">4</button>
+      <button class="btn btn-num" data-action="num" data-val="5">5</button>
+      <button class="btn btn-num" data-action="num" data-val="6">6</button>
+      <button class="btn btn-op" data-action="op" data-val="−">−</button>
+      <!-- Row 4 -->
+      <button class="btn btn-num" data-action="num" data-val="1">1</button>
+      <button class="btn btn-num" data-action="num" data-val="2">2</button>
+      <button class="btn btn-num" data-action="num" data-val="3">3</button>
+      <button class="btn btn-op" data-action="op" data-val="+">+</button>
+      <!-- Row 5 -->
+      <button class="btn btn-num btn-zero" data-action="num" data-val="0">0</button>
+      <button class="btn btn-dot btn-num" data-action="decimal">.</button>
+      <button class="btn btn-eq" data-action="equals">=</button>
+    </div>
+    <div class="label">CALC · 2025</div>
+  </div>
+</div>
 
-    <script>
-        const blogPosts = [
-            {
-                id: 1,
-                title: "Persian Cats: The Elegant Companion",
-                category: "long-hair",
-                description: "Known for their luxurious long coats and sweet personalities, Persian cats are one of the most popular breeds worldwide. They're gentle, affectionate, and love being pampered.",
-                image: "https://hips.hearstapps.com/hmg-prod/images/persian-cat-1674755952.jpg",
-                likes: "2.3k"
-            },
-            {
-                id: 2,
-                title: "Siamese: The Vocal Aristocrat",
-                category: "short-hair",
-                description: "Siamese cats are famous for their striking blue eyes, distinctive color points, and incredibly vocal nature. They're intelligent, social, and form strong bonds with their owners.",
-                image: "https://www.purina.co.uk/sites/default/files/2022-07/Siamese%20Cat.jpg",
-                likes: "1.8k"
-            },
-            {
-                id: 3,
-                title: "Maine Coon: The Gentle Giant",
-                category: "long-hair",
-                description: "One of the largest domestic cat breeds, Maine Coons are known for their impressive size, tufted ears, and friendly disposition. They're adaptable, playful, and great with families.",
-                image: "https://www.purina.co.uk/sites/default/files/2022-06/Maine-Coon-Cat.jpg",
-                likes: "3.1k"
-            },
-            {
-                id: 4,
-                title: "Bengal: The Wild Beauty",
-                category: "exotic",
-                description: "With their leopard-like spots and energetic personality, Bengals bring a touch of the wild into your home. They're athletic, intelligent, and love interactive play.",
-                image: "https://www.thesprucepets.com/thmb/KqrZGniYYHYOUMuOJdXxaEGPIy8=/2119x0/filters:no_upscale():strip_icc()/GettyImages-1189893683-e6309cb00a30453faf6103ebd67c74db.jpg",
-                likes: "2.7k"
-            },
-            {
-                id: 5,
-                title: "British Shorthair: The Teddy Bear",
-                category: "short-hair",
-                description: "With their plush coats and round faces, British Shorthairs resemble living teddy bears. They're calm, easygoing, and make perfect indoor companions.",
-                image: "https://www.purina.co.uk/sites/default/files/2022-06/British-Shorthair-Cat.jpg",
-                likes: "2.0k"
-            },
-            {
-                id: 6,
-                title: "Sphynx: The Hairless Wonder",
-                category: "exotic",
-                description: "Despite their lack of fur, Sphynx cats are warm to the touch and incredibly affectionate. They're extroverted, energetic, and love being the center of attention.",
-                image: "https://www.thesprucepets.com/thmb/8FPDkD4jTyXJdKDlLvbvLHZYp_I=/2121x0/filters:no_upscale():strip_icc()/sphynx-cat-on-blue-background-997062808-5c8ca89dc9e77c00011c5836.jpg",
-                likes: "1.5k"
-            },
-            {
-                id: 7,
-                title: "Ragdoll: The Floppy Friend",
-                category: "long-hair",
-                description: "Named for their tendency to go limp when picked up, Ragdolls are known for their docile temperament and striking blue eyes. They're affectionate lap cats who follow their owners everywhere.",
-                image: "https://www.purina.co.uk/sites/default/files/2022-07/Ragdoll.jpg",
-                likes: "2.9k"
-            },
-            {
-                id: 8,
-                title: "Scottish Fold: The Adorable Ears",
-                category: "short-hair",
-                description: "Recognizable by their unique folded ears, Scottish Folds have sweet, rounded faces and gentle personalities. They're adaptable, affectionate, and get along well with children and other pets.",
-                image: "https://www.purina.co.uk/sites/default/files/2022-07/Scottish%20Fold.jpg",
-                likes: "2.5k"
-            },
-            {
-                id: 9,
-                title: "Russian Blue: The Silver Shadow",
-                category: "short-hair",
-                description: "With their shimmering blue-grey coat and emerald eyes, Russian Blues are elegant and reserved. They're loyal to their families but can be shy around strangers.",
-                image: "https://www.purina.co.uk/sites/default/files/2022-07/Russian%20Blue.jpg",
-                likes: "1.9k"
-            }
-        ];
+<script>
+  const display = document.getElementById('result');
+  const expr = document.getElementById('expression');
 
-        function renderBlogPosts(posts) {
-            const blogGrid = document.getElementById('blogGrid');
-            blogGrid.innerHTML = '';
-            
-            posts.forEach(post => {
-                const card = document.createElement('div');
-                card.className = 'blog-card';
-                card.innerHTML = `
-                    <img src="${post.image}" alt="${post.title}" class="blog-image">
-                    <div class="blog-content">
-                        <span class="blog-category">${post.category.replace('-', ' ').toUpperCase()}</span>
-                        <h3 class="blog-title">${post.title}</h3>
-                        <p class="blog-description">${post.description}</p>
-                        <div class="blog-footer">
-                            <a href="#" class="read-more">Read More →</a>
-                            <span class="likes">❤️ ${post.likes}</span>
-                        </div>
-                    </div>
-                `;
-                blogGrid.appendChild(card);
-            });
+  let current = '0';
+  let operator = null;
+  let previous = null;
+  let resetNext = false;
+
+  function updateDisplay(val, shrink = false, isError = false) {
+    display.textContent = val;
+    display.classList.toggle('shrink', shrink || val.length > 9);
+    display.classList.toggle('error', isError);
+  }
+
+  function calculate(a, op, b) {
+    a = parseFloat(a); b = parseFloat(b);
+    switch(op) {
+      case '+': return a + b;
+      case '−': return a - b;
+      case '×': return a * b;
+      case '÷': return b === 0 ? null : a / b;
+    }
+  }
+
+  function formatNum(n) {
+    if (n === null) return 'Error';
+    let s = parseFloat(n.toPrecision(10)).toString();
+    if (s.length > 12) s = parseFloat(n.toExponential(4)).toString();
+    return s;
+  }
+
+  function handleAction(action, val) {
+    switch(action) {
+      case 'num':
+        if (current === '0' || resetNext) {
+          current = val;
+          resetNext = false;
+        } else {
+          if (current.length >= 12) return;
+          current += val;
         }
+        updateDisplay(current);
+        break;
 
-        // Filter functionality
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                const filter = btn.dataset.filter;
-                if (filter === 'all') {
-                    renderBlogPosts(blogPosts);
-                } else {
-                    const filtered = blogPosts.filter(post => post.category === filter);
-                    renderBlogPosts(filtered);
-                }
-            });
-        });
+      case 'decimal':
+        if (resetNext) { current = '0'; resetNext = false; }
+        if (!current.includes('.')) current += '.';
+        updateDisplay(current);
+        break;
 
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filtered = blogPosts.filter(post => 
-                post.title.toLowerCase().includes(searchTerm) ||
-                post.description.toLowerCase().includes(searchTerm)
-            );
-            renderBlogPosts(filtered);
-        });
+      case 'op':
+        if (operator && !resetNext) {
+          const res = calculate(previous, operator, current);
+          if (res === null) { updateDisplay('Div by 0', false, true); operator = null; previous = null; return; }
+          previous = formatNum(res);
+          updateDisplay(previous);
+        } else {
+          previous = current;
+        }
+        operator = val;
+        expr.textContent = `${previous} ${operator}`;
+        resetNext = true;
+        break;
 
-        // Initial render
-        renderBlogPosts(blogPosts);
-    </script>
+      case 'equals':
+        if (!operator || !previous) return;
+        const res = calculate(previous, operator, current);
+        expr.textContent = `${previous} ${operator} ${current} =`;
+        if (res === null) { updateDisplay('Div by 0', false, true); operator = null; previous = null; return; }
+        current = formatNum(res);
+        updateDisplay(current, current.length > 9);
+        operator = null;
+        previous = null;
+        resetNext = true;
+        break;
+
+      case 'clear':
+        current = '0'; operator = null; previous = null; resetNext = false;
+        expr.textContent = '';
+        updateDisplay('0');
+        break;
+
+      case 'sign':
+        if (current !== '0') {
+          current = current.startsWith('-') ? current.slice(1) : '-' + current;
+          updateDisplay(current);
+        }
+        break;
+
+      case 'percent':
+        current = formatNum(parseFloat(current) / 100);
+        updateDisplay(current);
+        break;
+    }
+  }
+
+  // Ripple effect
+  function createRipple(btn, e) {
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px`;
+    btn.appendChild(r);
+    r.addEventListener('animationend', () => r.remove());
+  }
+
+  document.getElementById('buttons').addEventListener('click', e => {
+    const btn = e.target.closest('.btn');
+    if (!btn) return;
+    createRipple(btn, e);
+    handleAction(btn.dataset.action, btn.dataset.val);
+  });
+
+  // Keyboard support
+  document.addEventListener('keydown', e => {
+    const map = {
+      '0':'num','1':'num','2':'num','3':'num','4':'num','5':'num','6':'num','7':'num','8':'num','9':'num',
+      '.':'decimal',',':'decimal',
+      '+':'op','*':'op','/':'op',
+      'Enter':'equals','=':'equals',
+      'Backspace':'backspace','Escape':'clear','%':'percent'
+    };
+    const key = e.key;
+    if (key >= '0' && key <= '9') handleAction('num', key);
+    else if (key === '.') handleAction('decimal');
+    else if (key === '+') handleAction('op', '+');
+    else if (key === '-') handleAction('op', '−');
+    else if (key === '*') handleAction('op', '×');
+    else if (key === '/') { e.preventDefault(); handleAction('op', '÷'); }
+    else if (key === 'Enter' || key === '=') handleAction('equals');
+    else if (key === 'Escape') handleAction('clear');
+    else if (key === '%') handleAction('percent');
+    else if (key === 'Backspace') {
+      if (current.length > 1) current = current.slice(0, -1);
+      else current = '0';
+      updateDisplay(current);
+    }
+  });
+</script>
 </body>
 </html>
